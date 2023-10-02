@@ -1,0 +1,68 @@
+name: End-to-end tests and automatic release
+
+on:
+  push:
+    branches:
+      - main # adjust this if you're working with a different branch
+
+jobs:
+  e2e_tests_and_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Cypress tests
+        run: |
+          npm start &
+          wait-on http://localhost:3000
+          npx cypress run
+        continue-on-error: true
+
+      - name: Store Cypress artifacts
+        if: failure()
+        run: |
+          mkdir -p cypress-artifacts/screenshots
+          mkdir -p cypress-artifacts/videos
+          cp -r cypress/screenshots/* cypress-artifacts/screenshots/
+          cp -r cypress/videos/* cypress-artifacts/videos/
+        continue-on-error: true
+
+      - name: Get version
+        id: package_version
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.version }}
+          release_name: Release ${{ env.version }}
+          draft: false
+          prerelease: false
+        if: success() # Only create a release if the tests are successful
+
+      - name: Output release URL
+        run: echo "Release URL is ${{ steps.create_release.outputs.html_url }}"
+        if: success() # Only show the release URL if the release was created successfully
+
+      - name: Upload Cypress artifacts
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress-artifacts
+          path: cypress-artifacts
