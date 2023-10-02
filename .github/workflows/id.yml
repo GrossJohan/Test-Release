@@ -1,4 +1,4 @@
-name: Extract Pivotal Tracker Story ID
+name: Get Pivotal Tracker Story Type
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  extract_story_id:
+  get_story_type:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,9 +26,22 @@ jobs:
           story_id=$(echo "$commit_message" | grep -oP '#\d+' | sed 's/#//')
           echo "::set-output name=story_id::$story_id"
 
-      - name: Display Extracted Story ID
+      - name: Make API Request to Pivotal Tracker
+        id: pivotal_api_request
         run: |
           story_id="${{ steps.extract_story_id.outputs.story_id }}"
-          echo "Extracted Story ID: $story_id"
+          pivotal_token="13c6a4cd8935a5188160900b446a1a07"
+          
+          # Make the API request to get the story type
+          response=$(curl -s -H "X-TrackerToken: $pivotal_token" \
+              "https://www.pivotaltracker.com/services/v5/projects/2674647/stories/$story_id")
 
-      # You can use ${{ steps.extract_story_id.outputs.story_id }} in subsequent steps
+          story_type=$(echo "$response" | jq -r '.story_type')
+          echo "::set-output name=story_type::$story_type"
+        env:
+          PIVOTAL_API_TOKEN: ${{ secrets.PIVOTAL_API_TOKEN }}
+
+      - name: Display Story Type
+        run: |
+          story_type="${{ steps.pivotal_api_request.outputs.story_type }}"
+          echo "Pivotal Tracker Story Type: $story_type"
