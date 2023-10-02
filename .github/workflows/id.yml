@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  e2e_tests_and_release:
+  e2e_test:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,14 +14,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Run Cypress tests
+      # Step 2: Determine the application port
+      - name: Determine Application Port
+        id: get_app_port
+        run: |
+       # Check if the .env file exists
+          if [ -f .env ]; then
+            # Read the port from the .env file (with spaces around the equal sign)
+            app_port=$(grep -Eo 'PORT[[:space:]]*=[[:space:]]*[0-9]+' .env | cut -d '=' -f 2)
+          else
+            # Use the default port (3000) if .env file doesn't exist
+            app_port=3000
+          fi
+
+          # Print the determined port
+          echo "Determined Application Port: $app_port"
+          echo "::set-output name=app_port::$app_port"
+
+      # Step 3: Run Cypress tests with the determined port
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
           start: npm start
-          wait-on: 'http://localhost:3000'
+          wait-on: "http://localhost:${{ steps.get_app_port.outputs.app_port }}"  # Use the dynamically determined port
 
-      # Step 3: Upload Cypress artifacts (screenshots on failure)
+      # Step 4: Upload Cypress artifacts (screenshots on failure)
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
@@ -29,7 +46,7 @@ jobs:
           path: cypress/screenshots
           if-no-files-found: ignore
 
-      # Step 4: Upload Cypress artifacts (videos on failure)
+      # Step 5: Upload Cypress artifacts (videos on failure)
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
@@ -39,8 +56,7 @@ jobs:
 
   get_story_type:
     runs-on: ubuntu-latest
-    needs: e2e_tests_and_release
-    if: success()
+    needs: e2e_test
 
     steps:
       - name: Checkout code
@@ -63,11 +79,12 @@ jobs:
         id: pivotal_api_request
         run: |
           story_id="${{ steps.extract_story_id.outputs.story_id }}"
-          pivotal_token="13c6a4cd8935a5188160900b446a1a07"
-          
+          pivotal_token=$PIVOTAL_TOKEN
+          project_id=$PIVOTAL_PROJECT_ID
+
           # Make the API request to get the story type
           response=$(curl -s -H "X-TrackerToken: $pivotal_token" \
-              "https://www.pivotaltracker.com/services/v5/projects/2674647/stories/$story_id")
+              "https://www.pivotaltracker.com/services/v5/projects/$project_id/stories/$story_id")
 
           story_type=$(echo "$response" | jq -r '.story_type')
           echo "::set-output name=story_type::$story_type"
@@ -79,8 +96,11 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    needs: [get_story_type, e2e_tests_and_release]
-    if: success()
+    needs: [ get_story_type, e2e_tests_and_release ]
+    if: |
+      success() &&
+      needs.get_story_type.result == 'success' &&
+      (needs.get_story_type.outputs.story_type == 'feature' || needs.get_story_type.outputs.story_type == 'bug')
 
     steps:
       - name: Checkout code for Release
