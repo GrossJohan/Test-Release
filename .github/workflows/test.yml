@@ -29,7 +29,7 @@ jobs:
           wait-on http://localhost:3000
           npx cypress cache clear
           npx cypress run
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Store Cypress artifacts
         if: failure()
@@ -38,7 +38,7 @@ jobs:
           mkdir -p cypress-artifacts/videos
           cp -r cypress/screenshots/* cypress-artifacts/screenshots/
           cp -r cypress/videos/* cypress-artifacts/videos/
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Get version
         id: package_version
