@@ -11,9 +11,27 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
         with:
-          ref: main
+          start: npm start
+          wait-on: 'http://localhost:3000'
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -22,23 +40,6 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-
-      - name: Run Cypress tests
-        run: |
-          npm start &
-          wait-on http://localhost:3000
-          npx cypress cache clear
-          npx cypress run
-        continue-on-error: false
-
-      - name: Store Cypress artifacts
-        if: failure()
-        run: |
-          mkdir -p cypress-artifacts/screenshots
-          mkdir -p cypress-artifacts/videos
-          cp -r cypress/screenshots/* cypress-artifacts/screenshots/
-          cp -r cypress/videos/* cypress-artifacts/videos/
-        continue-on-error: true
 
       - name: Get version
         id: package_version
@@ -55,15 +56,8 @@ jobs:
           release_name: Release ${{ env.version }}
           draft: false
           prerelease: false
-        if: success() # Only create a release if the tests are successful
+        if: success() # Only create a release if the Cypress tests are successful
 
       - name: Output release URL
         run: echo "Release URL is ${{ steps.create_release.outputs.html_url }}"
         if: success() # Only show the release URL if the release was created successfully
-
-      - name: Upload Cypress artifacts
-        if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: cypress-artifacts
-          path: cypress-artifacts
