@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Automatic Release Process
         if: ${{ steps.pivotal_api_request.outputs.story_type == 'feature' || steps.pivotal_api_request.outputs.story_type == 'bug' }}
-        steps:
+        run:
           - name: Checkout code for Release
             uses: actions/checkout@v2
             with:
