@@ -27,6 +27,7 @@ jobs:
         run: |
           npm start &
           wait-on http://localhost:3000
+          npx cypress cache clear
           npx cypress run
         continue-on-error: true
 
