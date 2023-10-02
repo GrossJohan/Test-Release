@@ -79,8 +79,8 @@ jobs:
         id: pivotal_api_request
         run: |
           story_id="${{ steps.extract_story_id.outputs.story_id }}"
-          pivotal_token=$PIVOTAL_TOKEN
-          project_id=$PIVOTAL_PROJECT_ID
+          pivotal_token="${{ secrets.PIVOTAL_TOKEN }}"
+          project_id="${{ secrets.PIVOTAL_PROJECT_ID }}"
 
           # Make the API request to get the story type
           response=$(curl -s -H "X-TrackerToken: $pivotal_token" \
