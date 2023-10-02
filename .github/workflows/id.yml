@@ -47,34 +47,30 @@ jobs:
       - name: Run Automatic Release Process
         if: ${{ steps.pivotal_api_request.outputs.story_type == 'feature' || steps.pivotal_api_request.outputs.story_type == 'bug' }}
         run: |
-          # Checkout code for Release
-          uses: actions/checkout@v2
-          with:
-            ref: main
-          
-          # Setup Node.js for Release
-          uses: actions/setup-node@v2
-          with:
-            node-version: '16'
-          
-          # Install Dependencies for Release
-          run: npm install
-          
-          # Get Version for Release
-          id: package_version
-          run: |
-            echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-          
-          # Create Release
-          id: create_release
-          uses: actions/create-release@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            tag_name: ${{ env.version }}
-            release_name: Release ${{ env.version }}
-            draft: false
-            prerelease: false
-          
-          # Output Release URL
-          run: echo "Release URL is ${{ steps.create_release.outputs.html_url }}"
+        
+      - name: Checkout code for Release
+        uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Setup Node.js for Release
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Install Dependencies for Release
+        run: npm install
+      - name: Get Version for Release
+        id: package_version
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.version }}
+          release_name: Release ${{ env.version }}
+          draft: false
+          prerelease: false
+      - name: Output Release URL
+        run: echo "Release URL is ${{ steps.create_release.outputs.html_url }}"
