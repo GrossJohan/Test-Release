@@ -1,4 +1,4 @@
-name: Get Pivotal Tracker Story Type
+name: Pivotal Tracker Story Type and Release
 
 on:
   push:
@@ -6,6 +6,37 @@ on:
       - main
 
 jobs:
+  e2e_tests_and_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Run Cypress tests
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          start: npm start
+          wait-on: 'http://localhost:3000'
+
+      # Step 3: Upload Cypress artifacts (screenshots on failure)
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+      # Step 4: Upload Cypress artifacts (videos on failure)
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore
+
   get_story_type:
     runs-on: ubuntu-latest
 
@@ -44,10 +75,11 @@ jobs:
           story_type="${{ steps.pivotal_api_request.outputs.story_type }}"
           echo "Pivotal Tracker Story Type: $story_type"
 
-      - name: Run Automatic Release Process
-        if: ${{ steps.pivotal_api_request.outputs.story_type == 'feature' || steps.pivotal_api_request.outputs.story_type == 'bug' }}
-        run: |
-        
+  release:
+    runs-on: ubuntu-latest
+    needs: [get_story_type]
+
+    steps:
       - name: Checkout code for Release
         uses: actions/checkout@v2
         with:
