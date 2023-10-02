@@ -1,0 +1,32 @@
+name: Extract Pivotal Tracker Story ID
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  extract_story_id:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get Commit Message
+        id: get_commit_message
+        run: |
+          commit_message=$(git log -1 --pretty=%B)
+          echo "::set-output name=commit_message::$commit_message"
+
+      - name: Extract Story ID
+        id: extract_story_id
+        run: |
+          commit_message="$commit_message" # Replace with the correct variable name
+          story_id=$(echo "$commit_message" | grep -oP '#\d+' | sed 's/#//')
+          echo "::set-output name=story_id::$story_id"
+
+      - name: Display Extracted Story ID
+        run: |
+          story_id="$STORY_ID" # Replace with the correct variable name
+          echo "Extracted Story ID: $story_id"
