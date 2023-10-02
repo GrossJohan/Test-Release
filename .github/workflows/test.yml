@@ -29,7 +29,7 @@ jobs:
           wait-on http://localhost:3000
           npx cypress cache clear
           npx cypress run
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Store Cypress artifacts
         if: failure()
