@@ -22,11 +22,13 @@ jobs:
       - name: Extract Story ID
         id: extract_story_id
         run: |
-          commit_message="$commit_message" # Replace with the correct variable name
+          commit_message="$commit_message"
           story_id=$(echo "$commit_message" | grep -oP '#\d+' | sed 's/#//')
-          echo "::set-output name=story_id::$story_id"
+          echo "Story ID: $story_id" # Print the story ID
 
       - name: Display Extracted Story ID
         run: |
-          story_id="$STORY_ID" # Replace with the correct variable name
+          story_id="$STORY_ID"
           echo "Extracted Story ID: $story_id"
+
+      # You can use ${{ steps.extract_story_id.outputs.story_id }} in subsequent steps
