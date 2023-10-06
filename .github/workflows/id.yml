@@ -46,7 +46,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    needs: [ e2e_test ]
+    needs: [e2e_test]
 
     steps:
       - name: Checkout code for Release
@@ -99,6 +99,7 @@ jobs:
 
       - name: Create Release
         id: create_release
+        if: success() && (steps.pivotal_api_request.outputs.story_type == 'feature' || steps.pivotal_api_request.outputs.story_type == 'bug')
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
