@@ -105,7 +105,6 @@ jobs:
       success() &&
       needs.get_story_type.result == 'success' &&
       (needs.get_story_type.outputs.story_type == 'feature' || needs.get_story_type.outputs.story_type == 'bug')
-      echo "Hello World"
 
     steps:
       - name: Checkout code for Release
