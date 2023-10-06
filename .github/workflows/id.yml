@@ -67,6 +67,7 @@ jobs:
         run: |
           commit_message=$(git log -1 --pretty=%B)
           echo "::set-output name=commit_message::$commit_message"
+          echo "Commit Message: $commit_message"
 
       - name: Extract Story ID
         id: extract_story_id
@@ -74,6 +75,7 @@ jobs:
           commit_message="${{ steps.get_commit_message.outputs.commit_message }}"
           story_id=$(echo "$commit_message" | grep -oP '#\d+' | sed 's/#//')
           echo "::set-output name=story_id::$story_id"
+          echo "Story ID: $story_id"
 
       - name: Make API Request to Pivotal Tracker
         id: pivotal_api_request
@@ -88,19 +90,23 @@ jobs:
 
           story_type=$(echo "$response" | jq -r '.story_type')
           echo "::set-output name=story_type::$story_type"
+          echo "Story Type: $story_type"
 
       - name: Display Story Type
         run: |
           story_type="${{ steps.pivotal_api_request.outputs.story_type }}"
           echo "Pivotal Tracker Story Type: $story_type"
+          echo "##[set-output name=story_type;]$story_type"
 
   release:
     runs-on: ubuntu-latest
     needs: [ get_story_type ]
     if: |
+      echo "Starting Release Workflow"
       success() &&
       needs.get_story_type.result == 'success' &&
       (needs.get_story_type.outputs.story_type == 'feature' || needs.get_story_type.outputs.story_type == 'bug')
+      echo "Hello World"
 
     steps:
       - name: Checkout code for Release
