@@ -102,9 +102,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ get_story_type ]
     if: |
-      success() &&
-      needs.get_story_type.result == 'success' &&
-      (needs.get_story_type.outputs.story_type == 'feature' || needs.get_story_type.outputs.story_type == 'bug')
+      success()
+#      needs.get_story_type.result == 'success' &&
+#      (needs.get_story_type.outputs.story_type == 'feature' || needs.get_story_type.outputs.story_type == 'bug')
 
     steps:
       - name: Checkout code for Release
