@@ -86,7 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ get_story_type ]
     if: |
-      success() && (needs.release.outputs.story_type_for_release == 'release' || needs.release.outputs.story_type_for_release == 'bug')
+      success() && (needs.get_story_type.outputs.story_type_for_release == 'release' || needs.get_story_type.outputs.story_type_for_release == 'bug')
 
     steps:
       - name: Checkout code for Release
