@@ -91,11 +91,13 @@ jobs:
         id: package_version
         run: |
           echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+          echo version
 
       - name: Get Previous Version for Release
         id: previous_package_version
         run: |
           echo "previous_version=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+          echo previous_version
 
       - name: Generate Comparison URL
         id: comparison_url
