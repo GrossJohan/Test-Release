@@ -113,7 +113,7 @@ jobs:
           release_name: Release ${{ env.version }}
           body: |
             ${{ steps.get_commit_message.outputs.commit_message }}
-            ${{ env.previous_version }}
+            Full Changelog: https://github.com/Sander7132/Projektijuhtimine/compare/${{ steps.get_previous_package_version.outputs.previous_version }}...${{ steps.get_package_version.outputs.version }}
           draft: false
           prerelease: false
 
