@@ -120,6 +120,8 @@ jobs:
           body: |
             ${{ steps.get_commit_message.outputs.commit_message }}
             Full Changelog: ${{ steps.comparison_url.outputs.comparison_url }}
+            Current Version: ${{ env.version }}
+            Previous Version: ${{ env.previous_version }}
           draft: false
           prerelease: false
 
