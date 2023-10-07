@@ -106,6 +106,8 @@ jobs:
         with:
           tag_name: ${{ env.version }}
           release_name: Release ${{ env.version }}
+          body: |
+            commit_message="${{ steps.get_commit_message.outputs.commit_message }}"
           draft: false
           prerelease: false
 
