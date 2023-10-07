@@ -97,24 +97,11 @@ jobs:
         run: |
           echo "previous_version=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
-      - name: Get Previous Release Tag
-        id: previous_release_tag
-        run: |
-          previous_tag=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1))
-          echo "::set-output name=previous_release_tag::$previous_tag"
-
-      - name: Get Current Release Tag
-        id: current_release_tag
-        run: |
-          current_tag=$(steps.package_version.outputs.version)
-#          current_tag="1.12.0"  # Replace with your current release tag
-          echo "::set-output name=current_release_tag::$current_tag"
-
       - name: Generate Comparison URL
         id: comparison_url
         run: |
-          previous_tag="${{ steps.previous_release_tag.outputs.previous_release_tag }}"
-          current_tag="${{ steps.current_release_tag.outputs.current_release_tag }}"
+          previous_tag="${{ steps.previous_package_version.outputs.previous_version }}"
+          current_tag="${{ steps.package_version.outputs.version }}"
           comparison_url="https://github.com/Sander7132/Projektijuhtimine/compare/$previous_tag...$current_tag"
           echo "::set-output name=comparison_url::$comparison_url"
 
