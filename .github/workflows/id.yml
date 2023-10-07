@@ -95,18 +95,6 @@ jobs:
           echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
           echo "Commit Version: ${{ env.version }}"
 
-      - name: Get Previous Version for Release
-        id: previous_package_version
-        run: |
-          echo "previous_version=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-          echo "Previous Version: ${{ env.previous_version }}"
-
-      - name: Generate Comparison URL
-        id: comparison_url
-        run: |
-          comparison_url="https://github.com/Sander7132/Projektijuhtimine/compare/${{ env.previous_version }}...${{ env.version }}"
-          echo "::set-output name=comparison_url::$comparison_url"
-
       - name: Create Release
         if: success() && (steps.pivotal_api_request.outputs.story_type == 'feature' || steps.pivotal_api_request.outputs.story_type == 'bug')
         uses: actions/create-release@v1
@@ -119,8 +107,3 @@ jobs:
             ${{ steps.get_commit_message.outputs.commit_message }}
           draft: false
           prerelease: false
-
-      - name: Output Release URL
-        run: echo "Release URL is https://github.com/GrossJohan/Test-Release/releases/tag/${{ steps.current_package_version.outputs.version }}"
-
-
