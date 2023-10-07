@@ -98,7 +98,7 @@ jobs:
       - name: Get Previous Version for Release
         id: previous_package_version
         run: |
-          echo "previous_version=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+          echo "previous_version=$(git describe --tags --abbrev=0 --always)" >> $GITHUB_ENV
           echo "Previous Version: ${{ env.previous_version }}"
 
       - name: Generate Comparison URL
