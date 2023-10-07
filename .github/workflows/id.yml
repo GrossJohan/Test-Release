@@ -121,7 +121,6 @@ jobs:
           prerelease: false
 
       - name: Output Release URL
-        if: steps.create_release.outputs.html_url
         run: echo "Release URL is https://github.com/GrossJohan/Test-Release/releases/tag/${{ steps.current_package_version.outputs.version }}"
 
 
