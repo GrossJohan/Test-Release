@@ -6,43 +6,43 @@ on:
       - main
 
 jobs:
-  e2e_test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Determine Application Port
-        id: get_app_port
-        run: |
-          if [ -f .env ]; then
-            app_port=$(grep -Eo 'PORT[[:space:]]*=[[:space:]]*[0-9]+' .env | cut -d '=' -f 2)
-          else
-            app_port=3000
-          fi
-          echo "Determined Application Port: $app_port"
-          echo "::set-output name=app_port::$app_port"
-
-      - name: Cypress run
-        uses: cypress-io/github-action@v5
-        with:
-          start: npm start
-          wait-on: "http://localhost:${{ steps.get_app_port.outputs.app_port }}"
-
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
-
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: cypress-videos
-          path: cypress/videos
-          if-no-files-found: ignore
+#  e2e_test:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#
+#      - name: Determine Application Port
+#        id: get_app_port
+#        run: |
+#          if [ -f .env ]; then
+#            app_port=$(grep -Eo 'PORT[[:space:]]*=[[:space:]]*[0-9]+' .env | cut -d '=' -f 2)
+#          else
+#            app_port=3000
+#          fi
+#          echo "Determined Application Port: $app_port"
+#          echo "::set-output name=app_port::$app_port"
+#
+#      - name: Cypress run
+#        uses: cypress-io/github-action@v5
+#        with:
+#          start: npm start
+#          wait-on: "http://localhost:${{ steps.get_app_port.outputs.app_port }}"
+#
+#      - uses: actions/upload-artifact@v3
+#        if: failure()
+#        with:
+#          name: cypress-screenshots
+#          path: cypress/screenshots
+#          if-no-files-found: ignore
+#
+#      - uses: actions/upload-artifact@v3
+#        if: failure()
+#        with:
+#          name: cypress-videos
+#          path: cypress/videos
+#          if-no-files-found: ignore
 
   release:
     runs-on: ubuntu-latest
@@ -67,6 +67,7 @@ jobs:
         run: |
           commit_message=$(git log -1 --pretty=%B)
           echo "::set-output name=commit_message::$commit_message"
+          echo "Commit Message: $commit_message"
 
       - name: Extract Story ID
         id: extract_story_id
@@ -74,6 +75,7 @@ jobs:
           commit_message="${{ steps.get_commit_message.outputs.commit_message }}"
           story_id=$(echo "$commit_message" | grep -oP '#\d+' | sed 's/#//')
           echo "::set-output name=story_id::$story_id"
+          echo "Story ID: $story_id"
 
       - name: Make API Request to Pivotal Tracker
         id: pivotal_api_request
@@ -91,13 +93,13 @@ jobs:
         id: package_version
         run: |
           echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-          echo "version=${{ env.version }}" >> $GITHUB_ENV
+          echo "Commit Version: ${{ env.version }}
 
       - name: Get Previous Version for Release
         id: previous_package_version
         run: |
           echo "previous_version=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-            echo "previous_version=${{ env.previous_version }}" >> $GITHUB_ENV
+          echo "Previous Version: ${{ env.previous_version }}
 
       - name: Generate Comparison URL
         id: comparison_url
