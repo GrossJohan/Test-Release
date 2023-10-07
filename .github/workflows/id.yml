@@ -115,7 +115,7 @@ jobs:
           release_name: Release ${{ env.version }}
           body: |
             ${{ steps.get_commit_message.outputs.commit_message }}
-            Full Changelog: ${{ steps.comparison_url.outputs.comparison_url }}
+            Full Changelog: ${{ steps.comparison_url }}
           draft: false
           prerelease: false
 
