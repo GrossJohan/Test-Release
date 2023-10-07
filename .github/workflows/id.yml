@@ -87,11 +87,6 @@ jobs:
           echo "Pivotal Tracker Story Type: $story_type"
           echo "::set-output name=story_type::$story_type"
 
-      - name: Create Release
-        if: success() && (steps.pivotal_api_request.outputs.story_type == 'feature' || steps.pivotal_api_request.outputs.story_type == 'bug')
-        run: |
-          echo "Creating a release..."
-
       - name: Get Version for Release
         id: package_version
         run: |
@@ -102,8 +97,28 @@ jobs:
         run: |
           echo "previous_version=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
+      - name: Get Previous Release Tag
+        id: previous_release_tag
+        run: |
+          previous_tag=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1))
+          echo "::set-output name=previous_release_tag::$previous_tag"
+
+      - name: Get Current Release Tag
+        id: current_release_tag
+        run: |
+          current_tag=$(git describe --tags --abbrev=0)
+#          current_tag="1.12.0"  # Replace with your current release tag
+          echo "::set-output name=current_release_tag::$current_tag"
+
+      - name: Generate Comparison URL
+        id: comparison_url
+        run: |
+          previous_tag="${{ steps.previous_release_tag.outputs.previous_release_tag }}"
+          current_tag="${{ steps.current_release_tag.outputs.current_release_tag }}"
+          comparison_url="https://github.com/Sander7132/Projektijuhtimine/compare/$previous_tag...$current_tag"
+          echo "::set-output name=comparison_url::$comparison_url"
+
       - name: Create Release
-        id: create_release
         if: success() && (steps.pivotal_api_request.outputs.story_type == 'feature' || steps.pivotal_api_request.outputs.story_type == 'bug')
         uses: actions/create-release@v1
         env:
@@ -113,10 +128,11 @@ jobs:
           release_name: Release ${{ env.version }}
           body: |
             ${{ steps.get_commit_message.outputs.commit_message }}
-            Full Changelog: https://github.com/Sander7132/Projektijuhtimine/compare/${{ steps.get_previous_package_version.outputs.previous_version }}...${{ steps.get_package_version.outputs.version }}
+            Full Changelog: ${{ steps.comparison_url.outputs.comparison_url }}
           draft: false
           prerelease: false
 
       - name: Output Release URL
         if: steps.create_release.outputs.html_url
         run: echo "Release URL is ${{ steps.create_release.outputs.html_url }}"
+
