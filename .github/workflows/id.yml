@@ -73,7 +73,8 @@ jobs:
         id: extract_story_id
         run: |
           commit_message="${{ steps.get_commit_message.outputs.commit_message }}"
-          story_id=$(echo "$commit_message" | grep -oP '#\d+' | sed 's/#//')
+#          story_id=$(echo "$commit_message" | grep -oP '#\d+' | sed 's/#//')
+          story_id=$(echo "$commit_message" | grep -oP '^#\d+')
           echo "::set-output name=story_id::$story_id"
           echo "Story ID: $story_id"
 
