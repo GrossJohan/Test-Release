@@ -117,14 +117,11 @@ jobs:
           release_name: Release ${{ env.version }}
           body: |
             ${{ steps.get_commit_message.outputs.commit_message }}
-            Full Changelog: ${{ steps.comparison_url.outputs.comparison_url }}
-            Current Version: ${{ env.version }}
-            Previous Version: ${{ env.previous_version }}
           draft: false
           prerelease: false
 
       - name: Output Release URL
         if: steps.create_release.outputs.html_url
-        run: echo "Release URL is ${{ steps.create_release.outputs.html_url }}"
+        run: echo "Release URL is https://github.com/GrossJohan/Test-Release/releases/tag/${{ steps.current_package_version.outputs.version }}"
 
 
